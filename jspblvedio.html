@@ -1,0 +1,290 @@
+<!Doctype>
+<html>
+<head>
+	<title>js～瀑布流里的视频和图片混合加载</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+		#main{
+			position: relative;
+
+		}
+		.box{
+			padding: 15px 0 0 15px;
+			float: left;
+		}
+		.pic{
+			padding: 10px;
+			border:1px solid #ccc;
+			border-radius: 5px;
+			box-shadow: 0 0 5px #ccc;
+		}
+		.pic img,.pic video{
+			width: 165px;
+			height: auto;
+
+		}
+		/*.morediv{
+			position: absolute;
+			width: 100%;
+			height:32px;
+			margin-top: 6020px;
+
+		}
+		.more{
+			position: relative;
+			width: 150px;
+			height: 35px;
+			color: #a1a1a1;
+			display: block;
+			margin: 0 auto;
+			cursor: pointer;
+			
+		}
+		.more:hover{
+			color: #990099;
+		}
+		.more img,.more span{
+			float: left;
+			position: absolute;
+		}
+		.more img{
+			width: 32px;
+			height: 32px;
+		}
+		.more span{
+			width: 100px;
+			margin-top: 8px;
+			margin-left:35px;
+		}*/
+	</style>
+	<script type="text/javascript">
+	window.onload=function(){
+		waterfall('main','box');
+		
+		var dateInt={"data":[{"src":'0.jpg',"type":'img'},{"src":'1.jpg',"type":'img'},{"src":'3.jpg',"type":'img'},{"src":'4.jpg',"type":'img'},{"src":'5.jpg',"type":'img'},{"src":'6.jpg',"type":'img'},{"src":'loading.gif',"type":'img'},{"src":'7.jpg',"type":'img'},{"src":'8.jpg',"type":'img'},{"src":'9.jpg',"type":'img'},{"src":'movie.ogg',"type":'video'},{"src":'10.jpg',"type":'img'}]};
+		window.onscroll=function(){
+			console.log("onscroll");
+
+				if(checkScrollSlide){
+				var oParent=document.getElementById('main');
+				// 将数据块渲染到当前页面的尾部
+				for(var i=0;i<dateInt.data.length;i++){
+					var oBox=document.createElement('div');
+					oBox.className='box';
+					oParent.appendChild(oBox);
+					var oPic=document.createElement('div');
+					oPic.className='pic';
+					oBox.appendChild(oPic);
+					console.log("dateInt.data[i].src:-----"+dateInt.data[i].src);
+					// 判断数据类型，是图片还是视频
+					if(dateInt.data[i].type=="img"){
+					var oImg=document.createElement('img');
+					oImg.src="img/"+dateInt.data[i].src;
+					oPic.appendChild(oImg);
+					}else if(dateInt.data[i].type=="video"){
+						var oVideo=document.createElement('video');
+					oVideo.src="img/"+dateInt.data[i].src;
+					oVideo.controls="controls";
+					oVideo.autoplay="autoplay";
+					oPic.appendChild(oVideo);
+					}
+				}
+				waterfall('main','box');
+				}
+
+				
+
+		}
+
+	}
+	function waterfall(parent,box){
+		// 将mail下的所以class为box的元素取出来
+		var oParent=document.getElementById(parent);
+		var oBoxs=getByClass(oParent,box);
+		// 计算整个页面显示的列数(页面宽/box的宽)
+		var oBoxW=oBoxs[0].offsetWidth;
+		// 取整
+		var cols=Math.floor(document.documentElement.clientWidth/oBoxW);
+		// 设置main的宽度
+		oParent.style.cssText='width:'+oBoxW*cols+'px;margin:0 auto;'
+		// 存放每一列高度的数组
+		var hArr=[];
+		for(var i=0;i<oBoxs.length;i++){
+			if(i<cols){
+				hArr.push(oBoxs[i].offsetHeight);
+			}else{
+				// 找高度最小的
+				var minH=Math.min.apply(null,hArr);
+				var index=getMinhIndex(hArr,minH);
+				oBoxs[i].style.position='absolute';
+				oBoxs[i].style.top=minH+'px';
+				// oBoxs[i].style.left=oBoxW*index+'px';
+				oBoxs[i].style.left=oBoxs[index].offsetLeft+'px';
+				hArr[index]+=oBoxs[i].offsetHeight;
+
+			} 
+
+		}
+
+	}
+	function getMinhIndex(arr,val){
+		for(var i in arr){
+			if(arr[i]==val){
+				return i;
+			}
+		}
+	}
+	// 检测是否具备了滚动加载数据块的条件
+	function checkScrollSlide(){
+		var oParent=document.getElementById('main');
+		var oBox=getByClass('oParent','box');
+		var lastBoxH=oBoxs[oBox.length-1].offsetTop+Math.floor(oBoxs[oBoxs.length-1].offsetHeight/2);
+		var scrollTop=document.body.scrollTop || document.documentElement.scrollTop;
+
+		console.log(scrollTop);
+		var height=document.body.clientHeight || document.documentElement.clientHeight;
+		return (lastBoxH<scrollTop+height)?true:false;
+
+
+	}
+	// 根据class获取元素
+	function getByClass(parent,clsName){
+		// 用来存储获取到的的所有class为box的元素
+		var boxArr=new Array();
+		oElements=parent.getElementsByTagName('*');
+		// 遍历
+		for (var i = 0; i <oElements.length; i++) {
+			if (oElements[i].className==clsName) {
+				boxArr.push(oElements[i]);
+			}
+		}
+		return boxArr;
+
+	}
+	// 加载更多
+	// function displayDate(){
+
+	// }
+
+</script>
+	
+</head>
+<body>
+	<div id="main">
+	<div class="box">
+		<div class="pic">
+			<img src="img/0.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/1.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/2.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/3.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/4.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/5.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/6.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/7.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<video controls="controls" autoplay="autoplay" src="img/movie.ogg">
+			Your browser does not support the video tag.
+			</video>
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/8.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/9.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/10.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/4.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/5.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/6.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/7.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<video controls="controls" autoplay="autoplay" src="img/movie.ogg">
+			Your browser does not support the video tag.
+			</video>
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/8.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/9.jpg">
+	   </div>
+	</div>
+	<div class="box">
+		<div class="pic">
+			<img src="img/10.jpg">
+	   </div>
+	</div>
+	
+
+</div>
+<!-- <div class="morediv">
+	<a class="more" onclick="displayDate()"><img src="img/loading.gif"><span>加载更多</span> </a>
+</div> -->
+</body>
+</html>
